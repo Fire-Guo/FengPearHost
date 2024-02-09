@@ -18,26 +18,34 @@ if (isset($userData) && is_array($userData)) {
     } */
     $userId=$userData['ID'];
     // 准备 SQL 语句，用于更新或插入记录  
-    $sql = "INSERT INTO hostpath (id, hostpath) VALUES (?, ?) ON DUPLICATE KEY UPDATE hostpath = VALUES(hostpath)";  
+   $sqlInsert = "INSERT INTO hostpath (id, hostpath) VALUES (?, ?) ON DUPLICATE KEY UPDATE hostpath = VALUES(hostpath)";  
+$sqlCheck = "SELECT * FROM hostpath WHERE id = ?";  
+$origindir = getpath();  
   
-    try {  
-        // 准备预处理语句  
-        $stmt = $pdo->prepare($sql);  
+try {  
+    // 准备并执行插入/更新语句  
+    $stmtInsert = $pdo->prepare($sqlInsert);  
+    $stmtInsert->execute([$userId, $newHostPath]);  
   
-        // 绑定参数并执行  
-        $stmt->execute([$userId, $newHostPath]);  
+    // 准备并执行检查语句  
+    $stmtCheck = $pdo->prepare($sqlCheck);  
+    $stmtCheck->execute([$userId]);  
+    $recordExists = $stmtCheck->fetch(PDO::FETCH_ASSOC) !== false;  
   
-        // 处理执行结果  
-        if ($stmt->rowCount() > 0) {  
-            rrmdir(getpath());
-            echo "托管站点已新建或更新成功！";  
-        } else {  
-            echo "没有发生任何更改。";  
-        }  
-    } catch (PDOException $e) {  
-        // 处理 PDO 异常  
-        echo "数据库操作失败: " . $e->getMessage();  
+    // 根据检查结果执行后续操作  
+    if ($recordExists) {  
+        // 记录存在，可能是插入了新记录或更新了现有记录  
+        rrmdir($origindir);  
+        mkdir(getpath());  
+        echo "托管站点已新建或更新成功！";  
+    } else {  
+        // 记录不存在，没有发生任何更改  
+        echo "没有发生任何更改。";  
     }  
+} catch (PDOException $e) {  
+    // 处理 PDO 异常  
+    echo "数据库操作失败: " . $e->getMessage();  
+}
     } else {  
     // 处理没有获取到用户数据的情况  
     echo 'No user data retrieved.';  
