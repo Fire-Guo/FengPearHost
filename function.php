@@ -133,7 +133,7 @@ function filecount($directoryPath) {
 
 
 function getpath(){
-    $serconfig = require("../config.php");
+    $serconfig = require("config.php");
 if (isset($_COOKIE['access_token'])) {  
     $accessToken = $_COOKIE['access_token'];  
     // 现在你可以使用$accessToken变量了  
@@ -194,3 +194,28 @@ function rrmdir($dir) {
         rmdir($dir);  
     }  
 }  
+
+function requirelogin(){
+    $serconfig = require("config.php");
+if (isset($_COOKIE['access_token'])) {  
+    $accessToken = $_COOKIE['access_token'];  
+} else {  
+    return 1;
+}  
+$userData = getuserdata($accessToken);
+if (isset($userData) && is_array($userData)) {  
+    if (isset($userData['ID'])) {  
+    $pdo = new PDO('mysql:host='.$serconfig["dbhost"].';dbname='.$serconfig["dbname"], $serconfig["dbuser"], $serconfig["dbpass"]);
+      $stmt = $pdo->prepare("SELECT hostpath FROM hostpath WHERE id = :id");  
+    $stmt->bindParam(':id', $userData['ID'], PDO::PARAM_INT);  
+    $stmt->execute();  
+    $result = $stmt->fetch(PDO::FETCH_ASSOC);  
+    if ($result && isset($result['hostpath'])) {  
+        return 0;
+    } else {  
+        return 2;
+    }  
+} else {  
+    return 1;
+}}
+}

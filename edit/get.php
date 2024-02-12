@@ -1,5 +1,12 @@
 <?php
 require_once "../function.php";
+if (requirelogin()==1){
+    header("Location: /login.php");
+    exit;
+} else if (requirelogin()==2){
+    header("Location: /path.php");
+    exit;
+}
 $file=$_GET['file'];
 function isValidFile($fileName) {  
     $allowedExtensions = array('html', 'css', 'js', 'svg','txt');  

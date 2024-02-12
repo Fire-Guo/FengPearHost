@@ -21,7 +21,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 if (xhr.status === 200) {  
                     // 加载文件内容到文本区域  
                     contentArea.value = xhr.responseText;  
-  
+                    updatePreview();
                     // 选中当前文件  
                     fileList.forEach(item => item.classList.remove('selected'));  
                     clickedFileItem.classList.add('selected'); // 使用 clickedFileItem  
@@ -103,3 +103,55 @@ document.addEventListener('DOMContentLoaded', function() {
         xhr.send('old=' + encodeURIComponent(filename) + '&new=' + encodeURIComponent(newFileName));  
     });  
 });
+
+
+
+document.addEventListener('DOMContentLoaded', function() {  
+    const editor = document.getElementById('file-content');  
+    const previewIframe = document.getElementById('preview-iframe');  
+  
+    if (!editor || !previewIframe) {  
+        console.error('Editor or preview iframe not found');  
+        return;  
+    }  
+// 使用防抖技术限制 updatePreview 的调用频率  
+const debouncedUpdatePreview = debounce(updatePreview, 500); // 500毫秒防抖  
+  
+// 添加 input 事件监听器  
+editor.addEventListener('input', debouncedUpdatePreview);  
+   
+});  
+  
+
+function updatePreview() {  
+    const editor = document.getElementById('file-content');  
+    const previewIframe = document.getElementById('preview-iframe');  
+        const previewDoc = previewIframe.contentDocument || previewIframe.contentWindow.document;  
+  
+        if (previewDoc) {  
+            // 确保内容是安全的HTML，避免XSS攻击（这里应该使用更安全的清理方法）  
+            //const safeHtml = sanitizeHtml(editor.value);  
+  
+            // 设置iframe的文档内容  
+            previewDoc.open();  
+            previewDoc.write(editor.value);  
+            previewDoc.close();  
+            
+        } else {  
+            console.error('Cannot access iframe document');  
+        }  
+        
+    }  
+    // 防抖函数  
+function debounce(func, wait) {  
+  let timeout;  
+  return function() {  
+    const context = this;  
+    const args = arguments;  
+    clearTimeout(timeout);  
+    timeout = setTimeout(function() {  
+      func.apply(context, args);  
+    }, wait);  
+  };  
+}  
+  

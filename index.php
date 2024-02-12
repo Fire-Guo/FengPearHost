@@ -71,13 +71,13 @@ if (isset($userData) && is_array($userData)) {
     }  
 } else {  
     // 如果$userdata[id]不存在，则进行错误处理  
-    //header("Location: login.php"); 
-    echo 1;
+    header("Location: login.php"); 
+    //echo 1;
 }  
 
 } else {  
     // 处理没有获取到用户数据的情况  
-    //header("Location: login.php"); 
-    echo 2;
+    header("Location: login.php"); 
+    //echo 2;
 }  
 }
